@@ -56,6 +56,20 @@ export default class App extends React.Component {
 			});
 		});
 	}
+	
+	tratarErro(err){
+		if(err){
+			let erros = [];
+			let errosTemp = err.entity.message.split('ConstraintViolationImpl');
+			if(errosTemp.length > 0){
+				for (var i = 1; i < errosTemp.length; i++) {
+					console.log(errosTemp[i].replaceAll('=', ':'));
+					erros.push( JSON.parse(errosTemp[i]));
+				}
+				console.log(erros);
+			}
+		}
+	}
 
 	onCreate(newVeiculo) {
 		var self = this;
@@ -68,11 +82,16 @@ export default class App extends React.Component {
 			})
 		}).then(response => {
 			return follow(client, root, [{rel: 'veiculoes', params: {'size': self.state.pageSize}}]);
+		}).catch((err) => {
+			return this.tratarErro(err);
 		}).done(response => {
-			if (typeof response.entity._links.last != "undefined") {
-				this.onNavigate(response.entity._links.last.href);
-			} else {
-				this.onNavigate(response.entity._links.self.href);
+			if(response){
+				if (typeof response.entity._links.last != "undefined") {
+					this.onNavigate(response.entity._links.last.href);
+				} else {
+					this.onNavigate(response.entity._links.self.href);
+				}
+				return 'ok';
 			}
 		});
 	}

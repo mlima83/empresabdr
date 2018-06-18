@@ -25,12 +25,20 @@ export default class CreateDialog extends React.Component {
 		this.props.attributes.forEach(attribute => {
 			newVeiculo[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
 		});
-		this.props.onCreate(newVeiculo);
-		this.props.attributes.forEach(attribute => {
-			ReactDOM.findDOMNode(this.refs[attribute]).value = ''; 
-		});
-		window.location = "#";
-		this.toggle();
+		let retorno = this.props.onCreate(newVeiculo);
+		if('ok' === retorno){
+			this.props.attributes.forEach(attribute => {
+				ReactDOM.findDOMNode(this.refs[attribute]).value = ''; 
+			});
+			window.location = "#";
+			this.toggle();
+		}else{
+			this.renderErros(retorno);
+		}
+	}
+	
+	renderErros(retorno){
+		
 	}
 
 	render() {

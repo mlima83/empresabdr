@@ -4,6 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -20,12 +23,16 @@ public class Veiculo {
 	@Id @GeneratedValue
 	private Long id;
 	
+	@NotEmpty
 	private String nome;
 	
+	@NotNull
 	private Integer ano;
 	
+	@NotEmpty
 	private String cor;
 	
+	@NotEmpty
 	private String placa;
 	
 	@Version @JsonIgnore

@@ -28,7 +28,7 @@ export default class Veiculo extends React.Component {
 								  onUpdate={this.props.onUpdate}/>
 				</td>
 				<td>
-					<Button color="danger" onClick={this.handleDelete}>Delete</Button>
+					<Button color="danger" onClick={this.handleDelete}>Remover</Button>
 				</td>
 			</tr>
 		)
