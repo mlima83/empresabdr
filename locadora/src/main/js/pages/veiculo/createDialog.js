@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import InputCustom  from '../../components/inputCustom';
 
 export default class CreateDialog extends React.Component {
 
@@ -8,7 +9,9 @@ export default class CreateDialog extends React.Component {
 		super(props);
 		this.handleSubmit = this.handleSubmit.bind(this);
 	    this.state = {
-	    	modal: false
+	    	modal: false,
+	    	veiculo: {},
+	    	erros: [],
 	    };
 	    this.toggle = this.toggle.bind(this);
 	}
@@ -22,31 +25,46 @@ export default class CreateDialog extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
 		var newVeiculo = {};
-		this.props.attributes.forEach(attribute => {
-			newVeiculo[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
-		});
-		let retorno = this.props.onCreate(newVeiculo);
-		if('ok' === retorno){
-			this.props.attributes.forEach(attribute => {
-				ReactDOM.findDOMNode(this.refs[attribute]).value = ''; 
+		this.props.onCreate(newVeiculo, 
+			() => {
+				let newVeiculo = [];
+				this.props.attributes.forEach(attribute => {
+					newVeiculo[attribute] = ''; 
+				});
+			    this.setState({
+			    	veiculo: newVeiculo,
+			    });
+				window.location = "#";
+				this.toggle();
+			},
+			(erros) => {
+				console.log(erros);
+			    this.setState({
+			    	erros
+			    });
 			});
-			window.location = "#";
-			this.toggle();
-		}else{
-			this.renderErros(retorno);
-		}
-	}
-	
-	renderErros(retorno){
-		
 	}
 
 	render() {
-		var inputs = this.props.attributes.map(attribute =>
-			<p key={attribute}>
-				<input type="text" placeholder={attribute} ref={attribute} className="form-control" />
-			</p>
-		);
+		var inputs = this.props.attributes.map(attribute =>{
+			let erro = this.state.erros[attribute] ? this.state.erros[attribute] : null;
+			return (
+				<InputCustom 
+					key={attribute}
+					attribute={attribute}
+					erro={erro} 
+					onChange={(value) => {
+						console.log(value);
+						let veiculo = {...this.state.veiculo}; 
+						veiculo[attribute] = value;
+						console.log(veiculo);
+					    this.setState({
+					    	veiculo: {...veiculo},
+					    });
+					}}
+				/>
+			);
+		});
 		return (
 			<div>
 				<Button color="success" onClick={this.toggle}>Novo</Button>

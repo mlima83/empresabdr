@@ -27,7 +27,6 @@ export default class Paginator extends React.Component {
 	renderNumbers(){
 		if(this.props.page && this.props.links.self){
 			var navLinks = [];
-			console.log(this.props.links.self.href);
 			for (var i = 0; i < this.props.page.totalPages; i++) {
 				let href = this.tratarUrl(this.props.links.self.href, i);
 				navLinks.push(

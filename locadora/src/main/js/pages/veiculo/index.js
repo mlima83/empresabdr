@@ -63,16 +63,23 @@ export default class App extends React.Component {
 			let errosTemp = err.entity.message.split('ConstraintViolationImpl');
 			if(errosTemp.length > 0){
 				for (var i = 1; i < errosTemp.length; i++) {
-					console.log(errosTemp[i].replaceAll('=', ':'));
-					erros.push( JSON.parse(errosTemp[i]));
+					let erro = errosTemp[i].split(',');
+					let property = erro[1].split('=')[1];
+					let message = erro[0].split('=')[1].replace(/'/g, '');
+					if(!erros[property]){
+						erros[property] = [];
+					}
+					erros[property].push(message);
 				}
-				console.log(erros);
 			}
+			return erros;
 		}
+		return null;
 	}
 
-	onCreate(newVeiculo) {
+	onCreate(newVeiculo, onSuccess, onError) {
 		var self = this;
+		var retorno;
 		follow(client, root, ['veiculoes']).then(response => {
 			return client({
 				method: 'POST',
@@ -83,15 +90,17 @@ export default class App extends React.Component {
 		}).then(response => {
 			return follow(client, root, [{rel: 'veiculoes', params: {'size': self.state.pageSize}}]);
 		}).catch((err) => {
-			return this.tratarErro(err);
+			if(onError)
+				onError(this.tratarErro(err));
 		}).done(response => {
-			if(response){
+			if(response && response.entity){
 				if (typeof response.entity._links.last != "undefined") {
 					this.onNavigate(response.entity._links.last.href);
 				} else {
 					this.onNavigate(response.entity._links.self.href);
 				}
-				return 'ok';
+				if(onSuccess)
+					onSuccess();
 			}
 		});
 	}
