@@ -56,7 +56,7 @@ export default class App extends React.Component {
 			});
 		});
 	}
-	
+	/**Realiza o tratamento do retorno de erro do spring*/
 	tratarErro(err){
 		if(err){
 			let erros = [];
@@ -105,7 +105,7 @@ export default class App extends React.Component {
 		});
 	}
 
-	onUpdate(veiculo, updatedVeiculo) {
+	onUpdate(veiculo, updatedVeiculo, onSuccess, onError) {
 		client({
 			method: 'PUT',
 			path: veiculo.entity._links.self.href,
@@ -117,11 +117,20 @@ export default class App extends React.Component {
 		}).done(response => {
 			this.loadFromServer(this.state.pageSize);
 		}, response => {
+			console.log(response);
+			if(onSuccess)
+				onSuccess();
 			if (response.status.code === 412) {
 				alert('DENIED: Unable to update ' +
 					veiculo.entity._links.self.href + '. Your copy is stale.');
 			}
 		});
+		
+//		.catch((err) => {
+//			console.log(err);			
+//			if(onError)
+//				onError(this.tratarErro(err));
+//		})
 	}
 
 	onDelete(veiculo) {

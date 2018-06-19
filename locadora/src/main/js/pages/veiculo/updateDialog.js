@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import InputCustom  from '../../components/inputCustom';
 
 export default class UpdateDialog extends React.Component {
 
@@ -8,7 +9,9 @@ export default class UpdateDialog extends React.Component {
 		super(props);
 		this.handleSubmit = this.handleSubmit.bind(this);
 	    this.state = {
-	    	modal: false
+	    	modal: false,
+	    	veiculo: props.veiculo.entity,
+	    	erros: [],
 	    };
 	    this.toggle = this.toggle.bind(this);		
 	}
@@ -22,24 +25,43 @@ export default class UpdateDialog extends React.Component {
 	
 	handleSubmit(e) {
 		e.preventDefault();
-		var updatedVeiculo = {};
-		this.props.attributes.forEach(attribute => {
-			updatedVeiculo[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
-		});
-		this.props.onUpdate(this.props.veiculo, updatedVeiculo);
-		window.location = "#";
-		this.toggle();
+		var updatedVeiculo = this.state.veiculo;
+		this.props.onUpdate(
+				this.props.veiculo, 
+				updatedVeiculo, 
+				/*onSuccess*/
+				() => {
+					window.location = "#";
+					this.toggle();
+				},
+				/*onError*/
+				(erros) => {
+					console.log(erros);
+				    this.setState({
+				    	erros
+				    });						
+				});
 	}
 
 	render() {
-		var inputs = this.props.attributes.map(attribute =>
-				<p key={this.props.veiculo.entity[attribute]}>
-					<input type="text" placeholder={attribute}
-						   defaultValue={this.props.veiculo.entity[attribute]}
-						   ref={attribute} className="form-control" />
-				</p>
-		);
-
+		let veiculo = this.state.veiculo; 
+		var inputs = this.props.attributes.map(attribute =>{
+			let erro = this.state.erros[attribute] ? this.state.erros[attribute] : null;
+			return (
+				<InputCustom 
+					key={attribute}
+					attribute={attribute}
+					erro={erro} 
+					defaultValue={this.props.veiculo.entity[attribute]}
+					onChange={(value) => {
+						veiculo[attribute] = value;
+					    this.setState({
+					    	veiculo: veiculo,
+					    });
+					}}
+				/>
+			);
+		});		
 
 		return (
 			<div>

@@ -10,8 +10,8 @@ export default class InputCustom extends React.Component {
 	renderErros(){
 		if(this.props.erro){
 			let erros = [];
-			erro.map(msg =>{
-				erros.push(<label>{msg}</label>);
+			this.props.erro.map((msg, index) =>{
+				erros.push(<label key={index} className="error">{msg}</label>);
 			});
 			return (erros);
 		}
@@ -25,6 +25,7 @@ export default class InputCustom extends React.Component {
 					type="text" 
 					placeholder={this.props.attribute} 
 					ref={this.props.attribute} 
+					defaultValue={this.props.defaultValue}
 					className="form-control" 
 					onChange={(evt) => {
 						this.props.onChange(evt.target.value);

@@ -2,3 +2,8 @@
 	align-items: baseline;
 	justify-content: center;
 } 
+
+.error{
+	color: red;
+	font-style: italic;
+}

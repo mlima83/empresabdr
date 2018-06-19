@@ -24,10 +24,10 @@ export default class CreateDialog extends React.Component {
 
 	handleSubmit(e) {
 		e.preventDefault();
-		var newVeiculo = {};
+		var newVeiculo = this.state.veiculo;
 		this.props.onCreate(newVeiculo, 
+			/*onSuccess*/
 			() => {
-				let newVeiculo = [];
 				this.props.attributes.forEach(attribute => {
 					newVeiculo[attribute] = ''; 
 				});
@@ -37,8 +37,8 @@ export default class CreateDialog extends React.Component {
 				window.location = "#";
 				this.toggle();
 			},
+			/*onError*/
 			(erros) => {
-				console.log(erros);
 			    this.setState({
 			    	erros
 			    });
@@ -46,6 +46,7 @@ export default class CreateDialog extends React.Component {
 	}
 
 	render() {
+		let veiculo = this.state.veiculo; 
 		var inputs = this.props.attributes.map(attribute =>{
 			let erro = this.state.erros[attribute] ? this.state.erros[attribute] : null;
 			return (
@@ -54,12 +55,9 @@ export default class CreateDialog extends React.Component {
 					attribute={attribute}
 					erro={erro} 
 					onChange={(value) => {
-						console.log(value);
-						let veiculo = {...this.state.veiculo}; 
 						veiculo[attribute] = value;
-						console.log(veiculo);
 					    this.setState({
-					    	veiculo: {...veiculo},
+					    	veiculo: veiculo,
 					    });
 					}}
 				/>
