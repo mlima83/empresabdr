@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
+ * Classe Controller de acesso aos dados pela view.
  * @author Marco Lima
  */
 @Controller

@@ -10,8 +10,13 @@ import VeiculoList  from './veiculoList';
 const when = require('when');
 const root = '/api';
 
+/**
+ * Componente de entrada para o CRUD de Veículo
+ * Renderiza a listagem de veículos com as opções de Cadastradar um novo veículo, alterar e remover um existente.
+ * Concentra também todo o acesso aos dados do servidor.
+ */
 export default class App extends React.Component {
-
+	/**Construtor padrão*/
 	constructor(props) {
 		super(props);
 		this.state = {veiculos: [], attributes: [], pageSize: 2, links: {}, page: {}};
@@ -22,6 +27,7 @@ export default class App extends React.Component {
 		this.onNavigate = this.onNavigate.bind(this);
 	}
 
+	/**Realiza o carregamento dos veículos apresentados da listagem*/
 	loadFromServer(pageSize) {
 		follow(client, root, [
 			{rel: 'veiculoes', params: {size: pageSize}}]
@@ -60,23 +66,17 @@ export default class App extends React.Component {
 	tratarErro(err){
 		if(err){
 			let erros = [];
-			let errosTemp = err.entity.message.split('ConstraintViolationImpl');
-			if(errosTemp.length > 0){
-				for (var i = 1; i < errosTemp.length; i++) {
-					let erro = errosTemp[i].split(',');
-					let property = erro[1].split('=')[1];
-					let message = erro[0].split('=')[1].replace(/'/g, '');
-					if(!erros[property]){
-						erros[property] = [];
-					}
-					erros[property].push(message);
-				}
-			}
+			console.log(err);
+			err.entity.errors.map(erro => {
+				if(!erros[erro.property])
+					erros[erro.property] = [];
+				erros[erro.property].push(erro);
+			});
 			return erros;
 		}
 		return null;
 	}
-
+	/**Método responsável por invocar a funcionalidade de criar um novo veículo*/
 	onCreate(newVeiculo, onSuccess, onError) {
 		var self = this;
 		var retorno;
@@ -105,6 +105,7 @@ export default class App extends React.Component {
 		});
 	}
 
+	/**Método responsável por invocar a funcionalidade de alterar um veículo existente*/
 	onUpdate(veiculo, updatedVeiculo, onSuccess, onError) {
 		client({
 			method: 'PUT',
@@ -116,29 +117,36 @@ export default class App extends React.Component {
 			}
 		}).done(response => {
 			this.loadFromServer(this.state.pageSize);
-		}, response => {
-			console.log(response);
 			if(onSuccess)
 				onSuccess();
-			if (response.status.code === 412) {
+		}, response => {
+			console.log(response);
+			switch (response.status.code) {
+			case 400:
+				if(onError)
+					onError(this.tratarErro(response));
+				break;
+			case 412:
 				alert('DENIED: Unable to update ' +
-					veiculo.entity._links.self.href + '. Your copy is stale.');
+						veiculo.entity._links.self.href + '. Your copy is stale.');
+				break;
+			default:
+				if(onSuccess)
+					onSuccess();
+				break;
 			}
 		});
 		
-//		.catch((err) => {
-//			console.log(err);			
-//			if(onError)
-//				onError(this.tratarErro(err));
-//		})
 	}
 
+	/**Método responsável por invocar a funcionalidade de remover um veículo existente*/
 	onDelete(veiculo) {
 		client({method: 'DELETE', path: veiculo.entity._links.self.href}).done(response => {
 			this.loadFromServer(this.state.pageSize);
 		});
 	}
 
+	/**Método responsável por realizar a navegação pela paginação feita pelo SpringDataRest*/
 	onNavigate(navUri) {
 		client({
 			method: 'GET',
@@ -165,20 +173,22 @@ export default class App extends React.Component {
 			});
 		});
 	}
-
+	/**Realiza a atualização da quantidade de registros apresentados na listagem*/
 	updatePageSize(pageSize) {
 		if (pageSize !== this.state.pageSize) {
 			this.loadFromServer(pageSize);
 		}
 	}
-
+	/**Método default de um componente react, responsável por invocar o 
+	 * carregamento da listagem assim que o compomente terminar de ser criado*/
 	componentDidMount() {
 		this.loadFromServer(this.state.pageSize);
 	}
-
+	/**Método do componente React responsável por imprimir em tela os elementos JSX*/
 	render() {
 		return (
 			<div className="container">
+				<h3>Listagem de Veículos</h3>
 				<CreateDialog attributes={this.state.attributes} onCreate={this.onCreate}/>
 				<VeiculoList veiculos={this.state.veiculos}
 					  links={this.state.links}

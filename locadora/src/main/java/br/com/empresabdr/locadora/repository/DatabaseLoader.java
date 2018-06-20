@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import br.com.empresabdr.locadora.entity.Veiculo;
 
 /**
+ * Classe responsável por carregar alguma massa de dados inicial.
  * @author Marco Lima
  */
 @Component

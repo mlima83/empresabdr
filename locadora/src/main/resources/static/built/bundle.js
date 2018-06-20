@@ -67,6 +67,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/**Realizando a chamada inicial do app React, passando o elemento onde será renderizada.*/
 	_reactDom2.default.render(_react2.default.createElement(_veiculo2.default, null), document.getElementById('react'));
 
 /***/ }),
@@ -19480,7 +19481,7 @@
 	
 	var _createDialog2 = _interopRequireDefault(_createDialog);
 	
-	var _veiculoList = __webpack_require__(87);
+	var _veiculoList = __webpack_require__(88);
 	
 	var _veiculoList2 = _interopRequireDefault(_veiculoList);
 	
@@ -19495,9 +19496,16 @@
 	var when = __webpack_require__(33);
 	var root = '/api';
 	
+	/**
+	 * Componente de entrada para o CRUD de Veículo
+	 * Renderiza a listagem de veículos com as opções de Cadastradar um novo veículo, alterar e remover um existente.
+	 * Concentra também todo o acesso aos dados do servidor.
+	 */
+	
 	var App = function (_React$Component) {
 		_inherits(App, _React$Component);
 	
+		/**Construtor padrão*/
 		function App(props) {
 			_classCallCheck(this, App);
 	
@@ -19511,6 +19519,9 @@
 			_this.onNavigate = _this.onNavigate.bind(_this);
 			return _this;
 		}
+	
+		/**Realiza o carregamento dos veículos apresentados da listagem*/
+	
 	
 		_createClass(App, [{
 			key: 'loadFromServer',
@@ -19548,12 +19559,31 @@
 					});
 				});
 			}
+			/**Realiza o tratamento do retorno de erro do spring*/
+	
+		}, {
+			key: 'tratarErro',
+			value: function tratarErro(err) {
+				if (err) {
+					var erros = [];
+					console.log(err);
+					err.entity.errors.map(function (erro) {
+						if (!erros[erro.property]) erros[erro.property] = [];
+						erros[erro.property].push(erro);
+					});
+					return erros;
+				}
+				return null;
+			}
+			/**Método responsável por invocar a funcionalidade de criar um novo veículo*/
+	
 		}, {
 			key: 'onCreate',
-			value: function onCreate(newVeiculo) {
+			value: function onCreate(newVeiculo, onSuccess, onError) {
 				var _this3 = this;
 	
 				var self = this;
+				var retorno;
 				(0, _follow2.default)(_client2.default, root, ['veiculoes']).then(function (response) {
 					return (0, _client2.default)({
 						method: 'POST',
@@ -19563,17 +19593,25 @@
 					});
 				}).then(function (response) {
 					return (0, _follow2.default)(_client2.default, root, [{ rel: 'veiculoes', params: { 'size': self.state.pageSize } }]);
+				}).catch(function (err) {
+					if (onError) onError(_this3.tratarErro(err));
 				}).done(function (response) {
-					if (typeof response.entity._links.last != "undefined") {
-						_this3.onNavigate(response.entity._links.last.href);
-					} else {
-						_this3.onNavigate(response.entity._links.self.href);
+					if (response && response.entity) {
+						if (typeof response.entity._links.last != "undefined") {
+							_this3.onNavigate(response.entity._links.last.href);
+						} else {
+							_this3.onNavigate(response.entity._links.self.href);
+						}
+						if (onSuccess) onSuccess();
 					}
 				});
 			}
+	
+			/**Método responsável por invocar a funcionalidade de alterar um veículo existente*/
+	
 		}, {
 			key: 'onUpdate',
-			value: function onUpdate(veiculo, updatedVeiculo) {
+			value: function onUpdate(veiculo, updatedVeiculo, onSuccess, onError) {
 				var _this4 = this;
 	
 				(0, _client2.default)({
@@ -19586,12 +19624,25 @@
 					}
 				}).done(function (response) {
 					_this4.loadFromServer(_this4.state.pageSize);
+					if (onSuccess) onSuccess();
 				}, function (response) {
-					if (response.status.code === 412) {
-						alert('DENIED: Unable to update ' + veiculo.entity._links.self.href + '. Your copy is stale.');
+					console.log(response);
+					switch (response.status.code) {
+						case 400:
+							if (onError) onError(_this4.tratarErro(response));
+							break;
+						case 412:
+							alert('DENIED: Unable to update ' + veiculo.entity._links.self.href + '. Your copy is stale.');
+							break;
+						default:
+							if (onSuccess) onSuccess();
+							break;
 					}
 				});
 			}
+	
+			/**Método responsável por invocar a funcionalidade de remover um veículo existente*/
+	
 		}, {
 			key: 'onDelete',
 			value: function onDelete(veiculo) {
@@ -19601,6 +19652,9 @@
 					_this5.loadFromServer(_this5.state.pageSize);
 				});
 			}
+	
+			/**Método responsável por realizar a navegação pela paginação feita pelo SpringDataRest*/
+	
 		}, {
 			key: 'onNavigate',
 			value: function onNavigate(navUri) {
@@ -19631,6 +19685,8 @@
 					});
 				});
 			}
+			/**Realiza a atualização da quantidade de registros apresentados na listagem*/
+	
 		}, {
 			key: 'updatePageSize',
 			value: function updatePageSize(pageSize) {
@@ -19638,17 +19694,27 @@
 					this.loadFromServer(pageSize);
 				}
 			}
+			/**Método default de um componente react, responsável por invocar o 
+	   * carregamento da listagem assim que o compomente terminar de ser criado*/
+	
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
 				this.loadFromServer(this.state.pageSize);
 			}
+			/**Método do componente React responsável por imprimir em tela os elementos JSX*/
+	
 		}, {
 			key: 'render',
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
 					{ className: 'container' },
+					_react2.default.createElement(
+						'h3',
+						null,
+						'Listagem de Ve\xEDculos'
+					),
 					_react2.default.createElement(_createDialog2.default, { attributes: this.state.attributes, onCreate: this.onCreate }),
 					_react2.default.createElement(_veiculoList2.default, { veiculos: this.state.veiculos,
 						links: this.state.links,
@@ -24757,6 +24823,10 @@
 	
 	var _reactstrap = __webpack_require__(77);
 	
+	var _inputCustom = __webpack_require__(87);
+	
+	var _inputCustom2 = _interopRequireDefault(_inputCustom);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -24765,6 +24835,11 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	/**
+	 * Componente responsável por criar um modal para cadastro de novo veículo.
+	 * 
+	 * Este componente recebe os atributos do veículo e renderiza os inputs de acordo com esse parâmetro
+	 */
 	var CreateDialog = function (_React$Component) {
 		_inherits(CreateDialog, _React$Component);
 	
@@ -24775,45 +24850,74 @@
 	
 			_this.handleSubmit = _this.handleSubmit.bind(_this);
 			_this.state = {
-				modal: false
+				modal: false,
+				veiculo: {},
+				erros: []
 			};
 			_this.toggle = _this.toggle.bind(_this);
 			return _this;
 		}
+		/**Método que controla o estado de abertura da modal*/
+	
 	
 		_createClass(CreateDialog, [{
 			key: 'toggle',
 			value: function toggle() {
 				this.setState({
-					modal: !this.state.modal
+					modal: !this.state.modal,
+					erros: this.state.modal ? [] : this.state.erros
 				});
 			}
+			/**Realiza a submissão dos dados do formulário*/
+	
 		}, {
 			key: 'handleSubmit',
 			value: function handleSubmit(e) {
 				var _this2 = this;
 	
 				e.preventDefault();
-				var newVeiculo = {};
-				this.props.attributes.forEach(function (attribute) {
-					newVeiculo[attribute] = _reactDom2.default.findDOMNode(_this2.refs[attribute]).value.trim();
+				var newVeiculo = this.state.veiculo;
+				this.props.onCreate(newVeiculo,
+				/*onSuccess*/
+				function () {
+					_this2.props.attributes.forEach(function (attribute) {
+						newVeiculo[attribute] = '';
+					});
+					_this2.setState({
+						veiculo: newVeiculo
+					});
+					window.location = "#";
+					_this2.toggle();
+				},
+				/*onError*/
+				function (erros) {
+					_this2.setState({
+						erros: erros
+					});
 				});
-				this.props.onCreate(newVeiculo);
-				this.props.attributes.forEach(function (attribute) {
-					_reactDom2.default.findDOMNode(_this2.refs[attribute]).value = '';
-				});
-				window.location = "#";
-				this.toggle();
 			}
 		}, {
 			key: 'render',
 			value: function render() {
+				var _this3 = this;
+	
+				var veiculo = this.state.veiculo;
+				/*percorrendo os atributos recebidos para rederização dos respectivos inpouts*/
 				var inputs = this.props.attributes.map(function (attribute) {
-					return _react2.default.createElement(
-						'p',
-						{ key: attribute },
-						_react2.default.createElement('input', { type: 'text', placeholder: attribute, ref: attribute, className: 'form-control' })
-					);
+					var erro = _this3.state.erros[attribute] ? _this3.state.erros[attribute] : null;
+					return _react2.default.createElement(_inputCustom2.default, {
+						key: attribute,
+						attribute: attribute,
+						className: attribute,
+						type: 'ano' === attribute ? 'number' : null,
+						erro: erro,
+						onChange: function onChange(value) {
+							veiculo[attribute] = value;
+							_this3.setState({
+								veiculo: veiculo
+							});
+						}
+					});
 				});
 				return _react2.default.createElement(
 					'div',
@@ -35065,13 +35169,106 @@
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	/**
+	 * Componente para input com renderização de mensagem de erro.
+	 * 
+	 * Propriedades:
+	 * 		attribute= nome do atributo
+	 * 		type= tipo válido para input html
+	 * 		erro= Object 
+	 * 		defaultValue= Valor default a ser carregado
+	 * 		onChange= Método executado no evento change
+	 */
+	var InputCustom = function (_React$Component) {
+		_inherits(InputCustom, _React$Component);
+	
+		function InputCustom(props) {
+			_classCallCheck(this, InputCustom);
+	
+			return _possibleConstructorReturn(this, (InputCustom.__proto__ || Object.getPrototypeOf(InputCustom)).call(this, props));
+		}
+	
+		_createClass(InputCustom, [{
+			key: 'renderErros',
+			value: function renderErros() {
+				if (this.props.erro) {
+					var erros = [];
+					this.props.erro.map(function (erro, index) {
+						erros.push(_react2.default.createElement(
+							'label',
+							{ key: index, className: 'error' },
+							erro.message
+						));
+					});
+					return erros;
+				}
+				return null;
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
+	
+				var className = 'form-control ' + this.props.className;
+				var type = this.props.type ? this.props.type : 'text';
+				return _react2.default.createElement(
+					'p',
+					{ key: this.props.attribute },
+					_react2.default.createElement('input', {
+						type: type,
+						placeholder: this.props.attribute,
+						ref: this.props.attribute,
+						defaultValue: this.props.defaultValue,
+						className: className,
+						onChange: function onChange(evt) {
+							_this2.props.onChange(evt.target.value);
+						}
+					}),
+					this.renderErros()
+				);
+			}
+		}]);
+	
+		return InputCustom;
+	}(_react2.default.Component);
+	
+	exports.default = InputCustom;
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(2);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(13);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
 	var _reactstrap = __webpack_require__(77);
 	
-	var _Veiculo = __webpack_require__(88);
+	var _Veiculo = __webpack_require__(89);
 	
 	var _Veiculo2 = _interopRequireDefault(_Veiculo);
 	
-	var _paginator = __webpack_require__(90);
+	var _paginator = __webpack_require__(91);
 	
 	var _paginator2 = _interopRequireDefault(_paginator);
 	
@@ -35083,6 +35280,9 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	/**
+	 * Componente reponsável por renderizar a listagem dos veículos.
+	 */
 	var VeiculoList = function (_React$Component) {
 		_inherits(VeiculoList, _React$Component);
 	
@@ -35215,7 +35415,7 @@
 	exports.default = VeiculoList;
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35236,7 +35436,7 @@
 	
 	var _reactstrap = __webpack_require__(77);
 	
-	var _updateDialog = __webpack_require__(89);
+	var _updateDialog = __webpack_require__(90);
 	
 	var _updateDialog2 = _interopRequireDefault(_updateDialog);
 	
@@ -35248,7 +35448,9 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	// tag::veiculo[]
+	/**
+	 * Componente responsável por renderizar um veículo, com as opções de alterar e remover o mesmo.
+	 */
 	var Veiculo = function (_React$Component) {
 		_inherits(Veiculo, _React$Component);
 	
@@ -35260,6 +35462,8 @@
 			_this.handleDelete = _this.handleDelete.bind(_this);
 			return _this;
 		}
+		/**Método que invoca o onDelete passado por parâmetro*/
+	
 	
 		_createClass(Veiculo, [{
 			key: 'handleDelete',
@@ -35305,7 +35509,7 @@
 						_react2.default.createElement(
 							_reactstrap.Button,
 							{ color: 'danger', onClick: this.handleDelete },
-							'Delete'
+							'Remover'
 						)
 					)
 				);
@@ -35320,7 +35524,7 @@
 	exports.default = Veiculo;
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35341,6 +35545,10 @@
 	
 	var _reactstrap = __webpack_require__(77);
 	
+	var _inputCustom = __webpack_require__(87);
+	
+	var _inputCustom2 = _interopRequireDefault(_inputCustom);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35349,6 +35557,11 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	/**
+	 * Componente responsável por criar um modal para alteração de veículo.
+	 * 
+	 * Este componente recebe os atributos do veículo e renderiza os inputs de acordo com esse parâmetro
+	 */
 	var UpdateDialog = function (_React$Component) {
 		_inherits(UpdateDialog, _React$Component);
 	
@@ -35359,46 +35572,70 @@
 	
 			_this.handleSubmit = _this.handleSubmit.bind(_this);
 			_this.state = {
-				modal: false
+				modal: false,
+				veiculo: props.veiculo.entity,
+				erros: []
 			};
 			_this.toggle = _this.toggle.bind(_this);
 			return _this;
 		}
+		/**Método que controla o estado de abertura da modal*/
+	
 	
 		_createClass(UpdateDialog, [{
 			key: 'toggle',
 			value: function toggle() {
 				this.setState({
-					modal: !this.state.modal
+					modal: !this.state.modal,
+					erros: this.state.modal ? [] : this.state.erros
 				});
 			}
+	
+			/**Realiza a submissão dos dados do formulário*/
+	
 		}, {
 			key: 'handleSubmit',
 			value: function handleSubmit(e) {
 				var _this2 = this;
 	
 				e.preventDefault();
-				var updatedVeiculo = {};
-				this.props.attributes.forEach(function (attribute) {
-					updatedVeiculo[attribute] = _reactDom2.default.findDOMNode(_this2.refs[attribute]).value.trim();
+				var updatedVeiculo = this.state.veiculo;
+				this.props.onUpdate(this.props.veiculo, updatedVeiculo,
+				/*onSuccess*/
+				function () {
+					window.location = "#";
+					_this2.toggle();
+				},
+				/*onError*/
+				function (erros) {
+					console.log(erros);
+					_this2.setState({
+						erros: erros
+					});
 				});
-				this.props.onUpdate(this.props.veiculo, updatedVeiculo);
-				window.location = "#";
-				this.toggle();
 			}
 		}, {
 			key: 'render',
 			value: function render() {
 				var _this3 = this;
 	
+				var veiculo = this.state.veiculo;
+				/*percorrendo os atributos recebidos para rederização dos respectivos inpouts*/
 				var inputs = this.props.attributes.map(function (attribute) {
-					return _react2.default.createElement(
-						'p',
-						{ key: _this3.props.veiculo.entity[attribute] },
-						_react2.default.createElement('input', { type: 'text', placeholder: attribute,
-							defaultValue: _this3.props.veiculo.entity[attribute],
-							ref: attribute, className: 'form-control' })
-					);
+					var erro = _this3.state.erros[attribute] ? _this3.state.erros[attribute] : null;
+					return _react2.default.createElement(_inputCustom2.default, {
+						key: attribute,
+						attribute: attribute,
+						type: 'ano' === attribute ? 'number' : null,
+						erro: erro,
+						defaultValue: _this3.props.veiculo.entity[attribute],
+						onChange: function onChange(value) {
+							veiculo[attribute] = value;
+							_this3.setState({
+								veiculo: veiculo
+							});
+						}
+					});
 				});
 	
 				return _react2.default.createElement(
@@ -35449,7 +35686,7 @@
 	;
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35478,6 +35715,12 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	/**
+	 * Componente de paginação
+	 * Propriedades:
+	 * 		links= Links retornados pelo springDataRest
+	 * 		page= Object Page retornado pelo springDataRest
+	 */
 	var Paginator = function (_React$Component) {
 		_inherits(Paginator, _React$Component);
 	
@@ -35520,7 +35763,6 @@
 	
 				if (this.props.page && this.props.links.self) {
 					var navLinks = [];
-					console.log(this.props.links.self.href);
 	
 					var _loop = function _loop() {
 						var href = _this4.tratarUrl(_this4.props.links.self.href, i);

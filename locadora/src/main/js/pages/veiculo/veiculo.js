@@ -3,14 +3,16 @@ import ReactDOM from 'react-dom';
 import { Button } from 'reactstrap';
 import UpdateDialog  from './updateDialog';
 
-// tag::veiculo[]
+/**
+ * Componente responsável por renderizar um veículo, com as opções de alterar e remover o mesmo.
+ */
 export default class Veiculo extends React.Component {
 
 	constructor(props) {
 		super(props);
 		this.handleDelete = this.handleDelete.bind(this);
 	}
-
+	/**Método que invoca o onDelete passado por parâmetro*/
 	handleDelete() {
 		this.props.onDelete(this.props.veiculo);
 	}

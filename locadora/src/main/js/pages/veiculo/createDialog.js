@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import InputCustom  from '../../components/inputCustom';
 
+/**
+ * Componente responsável por criar um modal para cadastro de novo veículo.
+ * 
+ * Este componente recebe os atributos do veículo e renderiza os inputs de acordo com esse parâmetro
+ */
 export default class CreateDialog extends React.Component {
 
 	constructor(props) {
@@ -15,13 +20,14 @@ export default class CreateDialog extends React.Component {
 	    };
 	    this.toggle = this.toggle.bind(this);
 	}
-	
+	/**Método que controla o estado de abertura da modal*/
 	toggle() {
 	    this.setState({
-	      modal: !this.state.modal
+	      modal: !this.state.modal,
+	      erros: this.state.modal ? [] : this.state.erros,
 	    });
 	}
-
+	/**Realiza a submissão dos dados do formulário*/
 	handleSubmit(e) {
 		e.preventDefault();
 		var newVeiculo = this.state.veiculo;
@@ -47,12 +53,15 @@ export default class CreateDialog extends React.Component {
 
 	render() {
 		let veiculo = this.state.veiculo; 
+		/*percorrendo os atributos recebidos para rederização dos respectivos inpouts*/
 		var inputs = this.props.attributes.map(attribute =>{
 			let erro = this.state.erros[attribute] ? this.state.erros[attribute] : null;
 			return (
 				<InputCustom 
 					key={attribute}
 					attribute={attribute}
+					className={attribute}
+					type={'ano' === attribute ? 'number' : null}
 					erro={erro} 
 					onChange={(value) => {
 						veiculo[attribute] = value;

@@ -2,6 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 
+/**
+ * Componente de paginação
+ * Propriedades:
+ * 		links= Links retornados pelo springDataRest
+ * 		page= Object Page retornado pelo springDataRest
+ */
 export default class Paginator extends React.Component {
 
 	constructor(props) {

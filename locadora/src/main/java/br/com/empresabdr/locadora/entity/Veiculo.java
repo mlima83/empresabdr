@@ -4,9 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -19,27 +16,30 @@ import lombok.Data;
 @Data
 @Entity
 public class Veiculo {
-
+	/**Identificador do veículo*/
 	@Id @GeneratedValue
 	private Long id;
 	
-	@NotEmpty
+	/**Nome*/
 	private String nome;
 	
-	@NotNull
+	/**Ano*/
 	private Integer ano;
 	
-	@NotEmpty
+	/**Cor predominante*/
 	private String cor;
 	
-	@NotEmpty
+	/**Placa*/
 	private String placa;
 	
+	/**Representa a versão do dado*/
 	@Version @JsonIgnore
 	private Long version;
 	
+	/**Construtor padrão*/
 	public Veiculo() {}
 
+	/**Construtor com os atributos*/
 	public Veiculo(String nome, Integer ano, String cor, String placa) {
 		this.nome = nome;
 		this.ano = ano;

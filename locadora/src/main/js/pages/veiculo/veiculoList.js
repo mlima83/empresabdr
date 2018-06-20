@@ -4,6 +4,9 @@ import { Button } from 'reactstrap';
 import Veiculo  from './Veiculo';
 import Paginator  from '../../components/paginator';
 
+/**
+ * Componente reponsável por renderizar a listagem dos veículos.
+ */
 export default class VeiculoList extends React.Component {
 
 	constructor(props) {
