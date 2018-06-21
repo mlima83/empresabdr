@@ -2,6 +2,11 @@
 
 Este projeto foi realizado para a avaliação da empresa DBR.
 
+## Arquivos
+
+- /doc - Documentação técnica
+- /locadora - Projeto eclipse
+
 ## Ferramentas necessárias
 
 - Eclipse Neon 4.6.0 ou superior
