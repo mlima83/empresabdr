@@ -6,6 +6,7 @@ Este projeto foi realizado para a avaliação da empresa DBR.
 
 - /doc - Documentação técnica
 - /locadora - Projeto eclipse
+- /dist - jar do projeto compilado
 
 ## Ferramentas necessárias
 
@@ -19,6 +20,13 @@ Este projeto foi realizado para a avaliação da empresa DBR.
 3. Aguarde o eclipse realizar o build e baixar todas as dependências.
 4. Execute a classe LocadoraApplication.java, clicando com o botão direito em cima > Run as > Java Application.
 5. Acesse no navegador http://localhost:8080
+
+## Executando o projeto compilado
+
+1. Baixe o jar dentro do diretório /dist
+2. Pela linha de comando, navegue ate o diretório do jar e execute #java -jar locadora-0.0.1-SNAPSHOT.jar
+3. Você verá o log inicialização do tomcat, aguarde o final da inicialização.
+4. Acesse no navegador http://localhost:8080
 
 ## Dicas
 
