@@ -2,3 +2,4 @@ node_modules/*
 
 target/*
 src/main/resources/static/built/*
+/target/

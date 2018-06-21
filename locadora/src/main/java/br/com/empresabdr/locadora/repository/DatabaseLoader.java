@@ -13,10 +13,10 @@ import br.com.empresabdr.locadora.entity.Veiculo;
 @Component
 public class DatabaseLoader implements CommandLineRunner {
 
-	private final EmployeeRepository repository;
+	private final VeiculoRepository repository;
 
 	@Autowired
-	public DatabaseLoader(EmployeeRepository repository) {
+	public DatabaseLoader(VeiculoRepository repository) {
 		this.repository = repository;
 	}
 
